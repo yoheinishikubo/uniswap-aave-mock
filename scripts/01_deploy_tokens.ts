@@ -20,12 +20,16 @@ export async function deployTokens() {
   await tkc.waitForDeployment();
 
   const d = await loadDeployments();
-  d.tokens = {
-    USDT: await usdt.getAddress(),
-    TKA: await tka.getAddress(),
-    TKB: await tkb.getAddress(),
-    TKC: await tkc.getAddress(),
-  };
+  // Preserve existing token map (e.g., KAIA alias to wrapped native), then add/overwrite our mock tokens
+  d.tokens = d.tokens || {};
+  d.tokens.USDT = await usdt.getAddress();
+  d.tokens.TKA = await tka.getAddress();
+  d.tokens.TKB = await tkb.getAddress();
+  d.tokens.TKC = await tkc.getAddress();
+  // Expose native as KAIA alias if WETH9 is deployed
+  if (d.weth9) {
+    d.tokens.KAIA = d.weth9;
+  }
   await saveDeployments(d);
 
   console.log("Tokens deployed:");
@@ -33,6 +37,9 @@ export async function deployTokens() {
   console.log("  TKA:", d.tokens.TKA);
   console.log("  TKB:", d.tokens.TKB);
   console.log("  TKC:", d.tokens.TKC);
+  if (d.tokens.KAIA) {
+    console.log("  KAIA (wrapped):", d.tokens.KAIA);
+  }
 }
 
 if (require.main === module) {
@@ -41,4 +48,3 @@ if (require.main === module) {
     process.exitCode = 1;
   });
 }
-
