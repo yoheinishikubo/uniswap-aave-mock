@@ -1,0 +1,45 @@
+{
+  "name": "uniswap-aave-mock",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Uniswap V3 and AAVE V3 (USDT-Only) mock with 4 ERC20s and swaps (Hardhat + TypeScript)",
+  "license": "MIT",
+  "type": "commonjs",
+  "scripts": {
+    "devnet": "bunx hardhat node",
+    "deploy": "bunx hardhat run --network localhost scripts/00_deploy_uniswap.ts && bunx hardhat run --network localhost scripts/01_deploy_tokens.ts && bunx hardhat run --network localhost scripts/02_create_pools_and_liquidity.ts && bunx hardhat run --network localhost scripts/03_demo_swaps.ts",
+    "deploy:hardhat": "bunx hardhat run scripts/deploy_all.ts",
+    "test": "bunx hardhat test",
+    "typechain": "bunx hardhat typechain",
+    "build": "bunx hardhat compile"
+  },
+  "engines": {
+    "node": ">=18",
+    "bun": ">=1.1.0"
+  },
+  "keywords": [],
+  "author": "",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "2.1.0",
+    "@nomicfoundation/hardhat-ethers": "3.1.0",
+    "@typechain/ethers-v6": "^0.5.1",
+    "@typechain/hardhat": "^9",
+    "@types/chai": "^4",
+    "@types/mocha": "^10",
+    "@types/node": "^20",
+    "chai": "^4",
+    "dotenv": "^17.2.2",
+    "hardhat": "^2.26.3",
+    "mocha": "^10",
+    "ts-node": "^10",
+    "tsconfig-paths": "^4",
+    "typechain": "^8",
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5",
+    "@uniswap/v3-core": "1.0.1",
+    "@uniswap/v3-periphery": "1.4.3",
+    "ethers": "^6"
+  }
+}

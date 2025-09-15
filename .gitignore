@@ -1,0 +1,16 @@
+node_modules
+dist
+.cache
+artifacts
+typechain
+coverage
+*.log
+.DS_Store
+.vscode
+.idea
+*.tsbuildinfo
+.env
+.env.*.local
+*.local
+deployments
+cache
