@@ -153,3 +153,70 @@ Notes
 - Ensure the `PRIVATE_KEY` account has test KLAY for gas on Kairos.
 - Artifacts path: `deployments/local.json` for `localhost`, `deployments/kairos.json` for `kairos` (and generally `deployments/<network>.json`).
 - You can also set `KAIROS_RPC_URL` to any Kairos-compatible HTTPS endpoint.
+
+## KAIA/USDT on Kairos
+
+Create a 0.3% fee Uniswap V3 pool between KAIA (wrapped native in this repo) and USDT on the Kairos testnet. In this setup, “KAIA” refers to the wrapped-native token deployed by our stack (`weth9`/WETH9Mock) and is exposed as `tokens.KAIA` in the deployments file.
+
+1) Configure environment and fund your deployer
+
+- Set `PRIVATE_KEY` (funded on Kairos) and optionally `KAIROS_RPC_URL`.
+
+```bash
+export PRIVATE_KEY=0xYOUR_PRIVATE_KEY
+# optional
+export KAIROS_RPC_URL=https://public-en-kairos.node.kaia.io
+```
+
+2) Deploy the Uniswap stack and tokens to Kairos
+
+```bash
+bunx hardhat run --network kairos scripts/00_deploy_uniswap.ts
+bunx hardhat run --network kairos scripts/01_deploy_tokens.ts
+```
+
+This deploys Factory, PositionManager, SwapRouter, and WETH9Mock (used as wrapped KAIA). The token step deploys USDT and aliases `tokens.KAIA = weth9` in `deployments/kairos.json`.
+
+3) Create the KAIA/USDT pool and seed liquidity
+
+```bash
+bunx hardhat run --network kairos scripts/02_create_pools_and_liquidity.ts
+```
+
+- The script detects `weth9` and automatically includes a `USDT_KAIA_3000` pool (fee 0.3%).
+- Initial price is set to approximately 1 KAIA = 0.15 USDT as an example; adjust in code if needed.
+- Note: the script also creates and seeds USDT/TKA, USDT/TKB, and USDT/TKC pools. If you only want KAIA/USDT, you can ignore the others or adapt the script to run only that pair.
+
+4) Find the pool address
+
+- Check `deployments/kairos.json` for:
+  - `tokens.KAIA`: wrapped native token address used as KAIA
+  - `tokens.USDT`: USDT address
+  - `pools.USDT_KAIA_3000.address`: the pool address
+
+Example paths:
+
+```text
+deployments/kairos.json: tokens.KAIA
+deployments/kairos.json: tokens.USDT
+deployments/kairos.json: pools.USDT_KAIA_3000.address
+```
+
+5) Optional: One-shot flow
+
+You can also run the all-in-one flow on Kairos (includes pool creation and optional Aave mock + funding):
+
+```bash
+# Everything (Uniswap + tokens + pools [+ optional Aave + optional fund])
+bunx hardhat run --network kairos scripts/deploy_all.ts
+
+# Variants
+SKIP_AAVE=1 bunx hardhat run --network kairos scripts/deploy_all.ts
+FUND_TO=0xYourAddress bunx hardhat run --network kairos scripts/deploy_all.ts
+```
+
+Troubleshooting
+
+- Ensure your deployer has enough test KAIA for gas on Kairos.
+- If `USDT_KAIA_3000` does not show up, confirm `weth9` exists in `deployments/kairos.json`; re-run `00_deploy_uniswap.ts` and `01_deploy_tokens.ts` before step 3.
+- This repo treats KAIA as the wrapped-native token deployed by our scripts (WETH9Mock). To use a canonical wrapped asset, you would need to deploy PositionManager and SwapRouter with that canonical wrapped address instead.

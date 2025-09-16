@@ -11,6 +11,9 @@ const NPMArtifact = require("@uniswap/v3-periphery/artifacts/contracts/Nonfungib
 // SwapRouter
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const RouterArtifact = require("@uniswap/v3-periphery/artifacts/contracts/SwapRouter.sol/SwapRouter.json");
+// Quoter
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const QuoterArtifact = require("@uniswap/v3-periphery/artifacts/contracts/lens/Quoter.sol/Quoter.json");
 
 export async function deployUniswap() {
   const [deployer] = await ethers.getSigners();
@@ -31,11 +34,17 @@ export async function deployUniswap() {
   const router = await Router.deploy(await factory.getAddress(), await weth9.getAddress());
   await router.waitForDeployment();
 
+  // Deploy Quoter for off-chain price/swap estimation
+  const Quoter = new ethers.ContractFactory(QuoterArtifact.abi, QuoterArtifact.bytecode, deployer);
+  const quoter = await Quoter.deploy(await factory.getAddress(), await weth9.getAddress());
+  await quoter.waitForDeployment();
+
   const d = await loadDeployments();
   d.factory = await factory.getAddress();
   d.weth9 = await weth9.getAddress();
   d.positionManager = await npm.getAddress();
   d.swapRouter = await router.getAddress();
+  d.quoter = await quoter.getAddress();
   await saveDeployments(d);
 
   console.log("Uniswap V3 stack deployed:");
@@ -43,6 +52,7 @@ export async function deployUniswap() {
   console.log("  Factory:", d.factory);
   console.log("  PositionManager:", d.positionManager);
   console.log("  SwapRouter:", d.swapRouter);
+  console.log("  Quoter:", d.quoter);
 }
 
 if (require.main === module) {
@@ -51,4 +61,3 @@ if (require.main === module) {
     process.exitCode = 1;
   });
 }
-

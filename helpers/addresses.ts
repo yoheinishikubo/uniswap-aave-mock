@@ -11,6 +11,7 @@ export type Deployments = {
   weth9?: string;
   positionManager?: string;
   swapRouter?: string;
+  quoter?: string;
   tokens?: Record<string, string>;
   pools?: Record<string, { address: string; positionId?: string; sqrtPriceX96?: string }>;
   // Aave V3 mocks
