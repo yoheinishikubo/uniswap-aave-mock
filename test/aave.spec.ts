@@ -2,6 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { loadDeployments } from "../helpers/addresses";
 import { ensureDeploymentReady } from "./shared";
+import { permit } from "../helpers/permit";
 import { deployAaveUsdtMock } from "../scripts/04_deploy_aave_usdt";
 
 describe("Aave V3 USDT Mock", () => {
@@ -26,8 +27,8 @@ describe("Aave V3 USDT Mock", () => {
 
     const amount = 5_000_000n; // 5 USDT (6 decimals)
 
-    // Approve and supply
-    await (await usdt.connect(user).approve(await pool.getAddress(), amount)).wait();
+    // Permit and supply
+    await permit(usdt, user, await pool.getAddress(), amount);
 
     const usdtBefore = await usdt.balanceOf(user.address);
     await (await pool.connect(user).supply(await usdt.getAddress(), amount, user.address, 0)).wait();
@@ -48,4 +49,3 @@ describe("Aave V3 USDT Mock", () => {
     expect(aAfterWithdraw).to.equal(half);
   });
 });
-

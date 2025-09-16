@@ -2,6 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { loadDeployments } from "../helpers/addresses";
 import { ensureDeploymentReady } from "./shared";
+import { permit } from "../helpers/permit";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const RouterArtifact = require("@uniswap/v3-periphery/artifacts/contracts/SwapRouter.sol/SwapRouter.json");
@@ -26,9 +27,9 @@ describe("Swaps", () => {
       const tokenA = await ethers.getContractAt("ERC20Decimals", a, signer);
       const tokenB = await ethers.getContractAt("ERC20Decimals", b, signer);
 
-      // ensure approvals
-      await (await tokenA.approve(router.target as string, (1n << 255n))).wait();
-      await (await tokenB.approve(router.target as string, (1n << 255n))).wait();
+      // ensure approvals via EIP-2612 permit
+      await permit(tokenA, signer as any, router.target as string, (1n << 255n));
+      await permit(tokenB, signer as any, router.target as string, (1n << 255n));
 
       const amountInA = 1_000n * 10n ** BigInt(decA);
       const amountInB = 1n * 10n ** BigInt(decB);
