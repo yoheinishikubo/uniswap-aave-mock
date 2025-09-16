@@ -21,9 +21,9 @@ import type {
   TypedLogDescription,
   TypedListener,
   TypedContractMethod,
-} from "../common";
+} from "../../../../../common";
 
-export interface WETH9MockInterface extends Interface {
+export interface ERC20PermitInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "DOMAIN_SEPARATOR"
@@ -31,7 +31,6 @@ export interface WETH9MockInterface extends Interface {
       | "approve"
       | "balanceOf"
       | "decimals"
-      | "deposit"
       | "eip712Domain"
       | "name"
       | "nonces"
@@ -40,16 +39,10 @@ export interface WETH9MockInterface extends Interface {
       | "totalSupply"
       | "transfer"
       | "transferFrom"
-      | "withdraw"
   ): FunctionFragment;
 
   getEvent(
-    nameOrSignatureOrTopic:
-      | "Approval"
-      | "Deposit"
-      | "EIP712DomainChanged"
-      | "Transfer"
-      | "Withdrawal"
+    nameOrSignatureOrTopic: "Approval" | "EIP712DomainChanged" | "Transfer"
   ): EventFragment;
 
   encodeFunctionData(
@@ -69,7 +62,6 @@ export interface WETH9MockInterface extends Interface {
     values: [AddressLike]
   ): string;
   encodeFunctionData(functionFragment: "decimals", values?: undefined): string;
-  encodeFunctionData(functionFragment: "deposit", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "eip712Domain",
     values?: undefined
@@ -101,10 +93,6 @@ export interface WETH9MockInterface extends Interface {
     functionFragment: "transferFrom",
     values: [AddressLike, AddressLike, BigNumberish]
   ): string;
-  encodeFunctionData(
-    functionFragment: "withdraw",
-    values: [BigNumberish]
-  ): string;
 
   decodeFunctionResult(
     functionFragment: "DOMAIN_SEPARATOR",
@@ -114,7 +102,6 @@ export interface WETH9MockInterface extends Interface {
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "decimals", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "eip712Domain",
     data: BytesLike
@@ -132,7 +119,6 @@ export interface WETH9MockInterface extends Interface {
     functionFragment: "transferFrom",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 }
 
 export namespace ApprovalEvent {
@@ -146,19 +132,6 @@ export namespace ApprovalEvent {
     owner: string;
     spender: string;
     value: bigint;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace DepositEvent {
-  export type InputTuple = [dst: AddressLike, wad: BigNumberish];
-  export type OutputTuple = [dst: string, wad: bigint];
-  export interface OutputObject {
-    dst: string;
-    wad: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -194,24 +167,11 @@ export namespace TransferEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace WithdrawalEvent {
-  export type InputTuple = [src: AddressLike, wad: BigNumberish];
-  export type OutputTuple = [src: string, wad: bigint];
-  export interface OutputObject {
-    src: string;
-    wad: bigint;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export interface WETH9Mock extends BaseContract {
-  connect(runner?: ContractRunner | null): WETH9Mock;
+export interface ERC20Permit extends BaseContract {
+  connect(runner?: ContractRunner | null): ERC20Permit;
   waitForDeployment(): Promise<this>;
 
-  interface: WETH9MockInterface;
+  interface: ERC20PermitInterface;
 
   queryFilter<TCEvent extends TypedContractEvent>(
     event: TCEvent,
@@ -268,8 +228,6 @@ export interface WETH9Mock extends BaseContract {
 
   decimals: TypedContractMethod<[], [bigint], "view">;
 
-  deposit: TypedContractMethod<[], [void], "payable">;
-
   eip712Domain: TypedContractMethod<
     [],
     [
@@ -320,8 +278,6 @@ export interface WETH9Mock extends BaseContract {
     "nonpayable"
   >;
 
-  withdraw: TypedContractMethod<[wad: BigNumberish], [void], "nonpayable">;
-
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
   ): T;
@@ -349,9 +305,6 @@ export interface WETH9Mock extends BaseContract {
   getFunction(
     nameOrSignature: "decimals"
   ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "deposit"
-  ): TypedContractMethod<[], [void], "payable">;
   getFunction(
     nameOrSignature: "eip712Domain"
   ): TypedContractMethod<
@@ -410,9 +363,6 @@ export interface WETH9Mock extends BaseContract {
     [boolean],
     "nonpayable"
   >;
-  getFunction(
-    nameOrSignature: "withdraw"
-  ): TypedContractMethod<[wad: BigNumberish], [void], "nonpayable">;
 
   getEvent(
     key: "Approval"
@@ -420,13 +370,6 @@ export interface WETH9Mock extends BaseContract {
     ApprovalEvent.InputTuple,
     ApprovalEvent.OutputTuple,
     ApprovalEvent.OutputObject
-  >;
-  getEvent(
-    key: "Deposit"
-  ): TypedContractEvent<
-    DepositEvent.InputTuple,
-    DepositEvent.OutputTuple,
-    DepositEvent.OutputObject
   >;
   getEvent(
     key: "EIP712DomainChanged"
@@ -442,13 +385,6 @@ export interface WETH9Mock extends BaseContract {
     TransferEvent.OutputTuple,
     TransferEvent.OutputObject
   >;
-  getEvent(
-    key: "Withdrawal"
-  ): TypedContractEvent<
-    WithdrawalEvent.InputTuple,
-    WithdrawalEvent.OutputTuple,
-    WithdrawalEvent.OutputObject
-  >;
 
   filters: {
     "Approval(address,address,uint256)": TypedContractEvent<
@@ -460,17 +396,6 @@ export interface WETH9Mock extends BaseContract {
       ApprovalEvent.InputTuple,
       ApprovalEvent.OutputTuple,
       ApprovalEvent.OutputObject
-    >;
-
-    "Deposit(address,uint256)": TypedContractEvent<
-      DepositEvent.InputTuple,
-      DepositEvent.OutputTuple,
-      DepositEvent.OutputObject
-    >;
-    Deposit: TypedContractEvent<
-      DepositEvent.InputTuple,
-      DepositEvent.OutputTuple,
-      DepositEvent.OutputObject
     >;
 
     "EIP712DomainChanged()": TypedContractEvent<
@@ -493,17 +418,6 @@ export interface WETH9Mock extends BaseContract {
       TransferEvent.InputTuple,
       TransferEvent.OutputTuple,
       TransferEvent.OutputObject
-    >;
-
-    "Withdrawal(address,uint256)": TypedContractEvent<
-      WithdrawalEvent.InputTuple,
-      WithdrawalEvent.OutputTuple,
-      WithdrawalEvent.OutputObject
-    >;
-    Withdrawal: TypedContractEvent<
-      WithdrawalEvent.InputTuple,
-      WithdrawalEvent.OutputTuple,
-      WithdrawalEvent.OutputObject
     >;
   };
 }

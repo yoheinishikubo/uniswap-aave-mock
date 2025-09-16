@@ -2,9 +2,10 @@
 pragma solidity ^0.8.20;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 
 // Minimal aToken for a single underlying asset.
-contract MockAToken is ERC20 {
+contract MockAToken is ERC20, ERC20Permit {
     address public immutable POOL;
     uint8 private immutable _decimals;
 
@@ -18,7 +19,7 @@ contract MockAToken is ERC20 {
         string memory symbol_,
         uint8 decimals_,
         address pool_
-    ) ERC20(name_, symbol_) {
+    ) ERC20(name_, symbol_) ERC20Permit(name_) {
         _decimals = decimals_;
         POOL = pool_;
     }
@@ -35,4 +36,3 @@ contract MockAToken is ERC20 {
         _burn(from, amount);
     }
 }
-

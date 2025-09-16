@@ -2,13 +2,14 @@
 pragma solidity ^0.8.20;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 
 // Minimal WETH9-like wrapper for local testing.
-contract WETH9Mock is ERC20("Wrapped Ether", "WETH9") {
+contract WETH9Mock is ERC20, ERC20Permit {
     event Deposit(address indexed dst, uint256 wad);
     event Withdrawal(address indexed src, uint256 wad);
 
-    constructor() {}
+    constructor() ERC20("Wrapped Ether", "WETH9") ERC20Permit("Wrapped Ether") {}
 
     receive() external payable {
         deposit();
@@ -26,4 +27,3 @@ contract WETH9Mock is ERC20("Wrapped Ether", "WETH9") {
         emit Withdrawal(msg.sender, wad);
     }
 }
-
