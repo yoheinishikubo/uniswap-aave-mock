@@ -18,6 +18,10 @@ const MAX_TICK = 887220;
 export async function createPoolsAndLiquidity() {
   const [deployer] = await ethers.getSigners();
   const d = await loadDeployments();
+  const SKIP_KAIA = process.argv.includes("--skip-kaia") || !!process.env.SKIP_KAIA;
+  if (SKIP_KAIA) {
+    console.log("[createPoolsAndLiquidity] Skipping KAIA/USDT pool (SKIP_KAIA enabled)");
+  }
 
   if (!d.factory || !d.positionManager || !d.tokens)
     throw new Error("Missing deployments; run 00 and 01 first");
@@ -89,8 +93,8 @@ export async function createPoolsAndLiquidity() {
     },
   ];
 
-  // Optionally add USDT/KAIA (wrapped native) if weth9 is available
-  if (d.weth9) {
+  // Optionally add USDT/KAIA (wrapped native) if weth9 is available and not skipped
+  if (d.weth9 && !SKIP_KAIA) {
     pairs.push({
       key: "USDT_KAIA_3000",
       a: await usdt.getAddress(),

@@ -2,6 +2,11 @@
 
 Local Uniswap V3 stack with four ERC20 tokens (USDT 6d, TKA/TKB/TKC 18d), pools at 0.3% fee, seeded liquidity, and demo swaps. Optionally includes a minimal Aave V3 mock pool for USDT-only (aUSDT 1:1), plus a helper to fund a recipient with 2,000 units of each token. Uses Bun as the package runner.
 
+## Important Notes
+
+- All tokens in this repo, including `USDT`, are mock tokens and are not the official versions.
+- Ensure the deploy wallet holds at least 1,000 KAIA to successfully run deployments.
+
 ## Prereqs
 
 - Node 18+
@@ -22,6 +27,7 @@ bun add ethers @openzeppelin/contracts @uniswap/v3-core @uniswap/v3-periphery
   - `KAIROS_RPC_URL`: optional RPC URL override for Kairos.
   - `FUND_TO`: recipient for `scripts/06_fund_recipient.ts` and the consolidated deploy.
   - `SKIP_AAVE`: set to `1` to skip Aave mock steps in `deploy_all.ts`.
+  - `SKIP_KAIA`: set to `1` to skip KAIA/USDT pool creation in pool/liquidity scripts and `deploy_all.ts`.
 - `.env` is gitignored; do not commit secrets.
 
 Example `.env`:
@@ -32,6 +38,7 @@ FUND_TO=0xYOUR_ADDRESS
 # Optional overrides
 # KAIROS_RPC_URL=https://public-en-kairos.node.kaia.io
 # SKIP_AAVE=1
+# SKIP_KAIA=1
 ```
 
 ## Usage
@@ -41,6 +48,7 @@ FUND_TO=0xYOUR_ADDRESS
 - Or run the consolidated flow (includes optional Aave + funding step): `bun run deploy:hardhat`
 - Optional: deploy Aave USDT mock then supply 1 USDT (see below)
 - Run tests: `bun run test`
+ - Skip KAIA/USDT pool: append `-- --skip-kaia` to the script command or set `SKIP_KAIA=1`.
 
 Deployed addresses and pool info are written to `deployments/local.json` (when using `--network localhost`). When running on another network (e.g. `--network kairos`), they are written to `deployments/<network>.json` (e.g. `deployments/kairos.json`).
 
@@ -102,6 +110,9 @@ bun run deploy:hardhat
 SKIP_AAVE=1 bun run deploy:hardhat
 # Set funding recipient in the consolidated flow
 FUND_TO=0xYourAddress bun run deploy:hardhat
+# Omit the KAIA/USDT pool creation
+bunx hardhat run --network localhost scripts/02_create_pools_and_liquidity.ts -- --skip-kaia
+SKIP_KAIA=1 bunx hardhat run --network localhost scripts/deploy_all.ts
 ```
 
 ## Price encoding note
@@ -138,6 +149,8 @@ bunx hardhat run --network kairos scripts/deploy_all.ts
 bunx hardhat run --network kairos scripts/00_deploy_uniswap.ts
 bunx hardhat run --network kairos scripts/01_deploy_tokens.ts
 bunx hardhat run --network kairos scripts/02_create_pools_and_liquidity.ts
+# Omit the KAIA/USDT pool
+bunx hardhat run --network kairos scripts/02_create_pools_and_liquidity.ts -- --skip-kaia
 # Optional demo swaps (requires funded account)
 bunx hardhat run --network kairos scripts/03_demo_swaps.ts
 # Optional Aave mock (after tokens)
@@ -213,6 +226,9 @@ bunx hardhat run --network kairos scripts/deploy_all.ts
 # Variants
 SKIP_AAVE=1 bunx hardhat run --network kairos scripts/deploy_all.ts
 FUND_TO=0xYourAddress bunx hardhat run --network kairos scripts/deploy_all.ts
+# Omit KAIA/USDT in the all-in-one flow
+bunx hardhat run --network kairos scripts/deploy_all.ts -- --skip-kaia
+SKIP_KAIA=1 bunx hardhat run --network kairos scripts/deploy_all.ts
 ```
 
 Troubleshooting
